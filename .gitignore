@@ -36,6 +36,7 @@ yarn-error.log
 
 # IDEs and editors
 .idea/
+.vscode/
 .project
 .classpath
 .c9/
@@ -44,15 +45,6 @@ yarn-error.log
 *.sublime-project
 *.sublime-workspace
 
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
-
-
 # Miscellaneous
 /.angular
 /.angular/cache
@@ -60,10 +52,11 @@ yarn-error.log
 /.nx
 /.nx/cache
 /connect.lock
-/coverage
 /libpeerconnection.log
 testem.log
 /typings
+/android
+/ios
 
 # System files
 .DS_Store
