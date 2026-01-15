@@ -1,0 +1,7 @@
+{
+  "name": "Receipt-Saver",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
