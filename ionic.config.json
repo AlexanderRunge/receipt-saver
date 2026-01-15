@@ -1,5 +1,5 @@
 {
-  "name": "Receipt-Saver",
+  "name": "receipt-saver",
   "integrations": {
     "capacitor": {}
   },
