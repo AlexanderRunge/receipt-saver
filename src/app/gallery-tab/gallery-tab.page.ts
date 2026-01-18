@@ -1,23 +1,25 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonGrid, IonRow, IonCol, IonImg,
   ActionSheetController
 } from '@ionic/angular/standalone';
-import type { UserPhoto } from '../services/photo.service'
+import type { PhotoInterface } from '../interfaces/photo.interface'
 import { PhotoService } from '../services/photo.service';
+import { ReceiptService } from '../services/receipt.service';
 import { addIcons } from "ionicons";
 import { camera } from 'ionicons/icons';
 
 @Component({
-  selector: 'app-tab2',
-  templateUrl: 'tab2.page.html',
-  styleUrls: ['tab2.page.scss'],
+  selector: 'app-gallery-tab',
+  templateUrl: 'gallery-tab.page.html',
+  styleUrls: ['gallery-tab.page.scss'],
   standalone: true,
   imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonGrid, IonRow, IonCol, IonImg]
 })
 
-export class Tab2Page {
+export class GalleryTabPage implements OnInit {
   public photoService = inject(PhotoService);
+  public receiptService = inject(ReceiptService);
   public actionSheetController = inject(ActionSheetController);
 
   constructor() {
@@ -25,15 +27,24 @@ export class Tab2Page {
   }
 
   async ngOnInit() {
-    await this.photoService.loadSaved()
+    await this.receiptService.loadReceipts();
   }
 
-  addPhotoToGallery() {
-    this.photoService.addNewToGallery();
+  get photos(): PhotoInterface[] {
+    return this.receiptService.receipts.map(receipt => receipt.photo);
+  }
+  
+  get photosWithContext() {
+    return this.receiptService.receipts.map(receipt => ({
+      photo: receipt.photo,
+      storeName: receipt.storeName,
+      date: receipt.date,
+      receiptId: receipt.id
+    }));
   }
 
-  public async showActionSheet(photo: UserPhoto, position: number) {
-    const actionSheet = await this.actionSheetController.create({
+  public async showActionSheet(photo: PhotoInterface, position: number) {
+    /*const actionSheet = await this.actionSheetController.create({
       header: 'Photos',
       buttons: [
         {
@@ -52,6 +63,6 @@ export class Tab2Page {
         },
       ],
     });
-    await actionSheet.present();
+    await actionSheet.present();*/
   }
 }
