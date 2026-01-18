@@ -4,12 +4,13 @@ import { Filesystem, Directory } from "@capacitor/filesystem";
 import { Preferences } from "@capacitor/preferences";
 import { Platform } from "@ionic/angular"
 import { Capacitor } from "@capacitor/core";
+import { PhotoInterface } from "../interfaces/photo.interface"
 
 @Injectable({
   providedIn: 'root',
 })
 export class PhotoService {
-  public photos: UserPhoto[] = [];
+  public photos: PhotoInterface[] = [];
 
   private PHOTO_STORAGE: string = 'photos';
 
@@ -83,7 +84,7 @@ export class PhotoService {
 
   public async loadSaved() {
     const { value: photoList } = await Preferences.get({ key: this.PHOTO_STORAGE });
-    this.photos = (photoList ? JSON.parse(photoList) : []) as UserPhoto[];
+    this.photos = (photoList ? JSON.parse(photoList) : []) as PhotoInterface[];
 
     if (this.platform.is('hybrid')) {
       for (let photo of this.photos) {
@@ -97,7 +98,7 @@ export class PhotoService {
     }
   }
 
-  public async deletePhoto(photo: UserPhoto, position: number) {
+  public async deletePhoto(photo: PhotoInterface, position: number) {
     this.photos.splice(position, 1);
 
     Preferences.set({
@@ -112,9 +113,4 @@ export class PhotoService {
       directory: Directory.Data,
     });
   }
-}
-
-export interface UserPhoto {
-  filepath: string;
-  webviewPath?: string;
 }
