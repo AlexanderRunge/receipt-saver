@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Filesystem, Directory } from "@capacitor/filesystem";
-import { Preferences } from "@capacitor/preferences";
 import { Platform } from "@ionic/angular"
 import { Capacitor } from "@capacitor/core";
 import { PhotoInterface } from "../interfaces/photo.interface"
@@ -10,34 +9,35 @@ import { PhotoInterface } from "../interfaces/photo.interface"
   providedIn: 'root',
 })
 export class PhotoService {
-  public photos: PhotoInterface[] = [];
-
-  private PHOTO_STORAGE: string = 'photos';
-
   private platform: Platform;
 
   constructor() {
     this.platform = inject(Platform);
   }
 
-  public async addNewToGallery() {
-    const capturedPhoto = await Camera.getPhoto({
-      resultType: CameraResultType.Uri,
-      source: CameraSource.Prompt,
-      quality: 100,
-    });
+  /**
+   * Capture a new photo and save it to the filesystem
+   * Returns the saved photo reference without managing it in an internal array
+   */
+  public async captureAndSavePhoto(): Promise<PhotoInterface> {
+    try {
+      const capturedPhoto = await Camera.getPhoto({
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Prompt,
+        quality: 100,
+      });
 
-    const savedPhotoFile = await this.savePhoto(capturedPhoto);
-
-    this.photos.unshift(savedPhotoFile);
-
-    await Preferences.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(this.photos),
-    });
+      return await this.savePhoto(capturedPhoto);
+    } catch (error) {
+      console.error('Error capturing photo:', error);
+      throw error;
+    }
   }
 
-  private async savePhoto(photo: Photo) {
+  /**
+   * Save a photo to the filesystem
+   */
+  private async savePhoto(photo: Photo): Promise<PhotoInterface> {
     let base64Data: string | Blob;
 
     if (this.platform.is('hybrid')) {
@@ -71,46 +71,50 @@ export class PhotoService {
     }
   }
 
-  private convertBlobToBase64(blob: Blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onload = ()=> {
-        resolve(reader.result);
+  /**
+   * Load a photo from the filesystem for display
+   */
+  public async loadPhoto(photo: PhotoInterface): Promise<PhotoInterface> {
+    if (this.platform.is('hybrid')) {
+      const readFile = await Filesystem.readFile({
+        path: photo.filepath,
+        directory: Directory.Data,
+      });
+
+      return {
+        ...photo,
+        webviewPath: `data:image/jpeg;base64,${readFile.data}`,
       };
-      reader.readAsDataURL(blob);
-    });
+    }
+
+    return photo;
   }
 
-  public async loadSaved() {
-    const { value: photoList } = await Preferences.get({ key: this.PHOTO_STORAGE });
-    this.photos = (photoList ? JSON.parse(photoList) : []) as PhotoInterface[];
+  /**
+   * Delete a photo from the filesystem
+   */
+  public async deletePhoto(photo: PhotoInterface): Promise<void> {
+    try {
+      const filename = photo.filepath.slice(photo.filepath.lastIndexOf('/') + 1);
 
-    if (this.platform.is('hybrid')) {
-      for (let photo of this.photos) {
-        const readFile = await Filesystem.readFile({
-          path: photo.filepath,
-          directory: Directory.Data,
-        });
-
-        photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
-      }
+      await Filesystem.deleteFile({
+        path: filename,
+        directory: Directory.Data,
+      });
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+      throw error;
     }
   }
 
-  public async deletePhoto(photo: PhotoInterface, position: number) {
-    this.photos.splice(position, 1);
-
-    Preferences.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(this.photos),
-    });
-
-    const filename = photo.filepath.slice(photo.filepath.lastIndexOf('/') + 1);
-
-    await Filesystem.deleteFile({
-      path: filename,
-      directory: Directory.Data,
+  private convertBlobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.readAsDataURL(blob);
     });
   }
 }
