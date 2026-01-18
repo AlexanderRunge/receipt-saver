@@ -1,6 +1,6 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonGrid, IonRow, IonCol, IonImg,
+  IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonImg,
   ActionSheetController
 } from '@ionic/angular/standalone';
 import type { PhotoInterface } from '../interfaces/photo.interface'
@@ -14,7 +14,7 @@ import { camera } from 'ionicons/icons';
   templateUrl: 'gallery-tab.page.html',
   styleUrls: ['gallery-tab.page.scss'],
   standalone: true,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonGrid, IonRow, IonCol, IonImg]
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonImg]
 })
 
 export class GalleryTabPage implements OnInit {
@@ -33,7 +33,7 @@ export class GalleryTabPage implements OnInit {
   get photos(): PhotoInterface[] {
     return this.receiptService.receipts.map(receipt => receipt.photo);
   }
-  
+
   get photosWithContext() {
     return this.receiptService.receipts.map(receipt => ({
       photo: receipt.photo,
@@ -43,7 +43,7 @@ export class GalleryTabPage implements OnInit {
     }));
   }
 
-  public async showActionSheet(photo: PhotoInterface, position: number) {
+  public async showActionSheet(photo: PhotoInterface) {
     /*const actionSheet = await this.actionSheetController.create({
       header: 'Photos',
       buttons: [
