@@ -3,21 +3,21 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonImg,
   ActionSheetController
 } from '@ionic/angular/standalone';
-import type { PhotoInterface } from '../interfaces/photo.interface'
-import { PhotoService } from '../services/photo.service';
-import { ReceiptService } from '../services/receipt.service';
+import type { PhotoInterface } from '../../interfaces/photo.interface'
+import { PhotoService } from '../../services/photo.service';
+import { ReceiptService } from '../../services/receipt.service';
 import { addIcons } from "ionicons";
 import { camera } from 'ionicons/icons';
 
 @Component({
-  selector: 'app-gallery-tab',
-  templateUrl: 'gallery-tab.page.html',
-  styleUrls: ['gallery-tab.page.scss'],
+  selector: 'app-gallery',
+  templateUrl: 'gallery.page.html',
+  styleUrls: ['gallery.page.scss'],
   standalone: true,
   imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonImg]
 })
 
-export class GalleryTabPage implements OnInit {
+export class GalleryPage implements OnInit {
   public photoService = inject(PhotoService);
   public receiptService = inject(ReceiptService);
   public actionSheetController = inject(ActionSheetController);

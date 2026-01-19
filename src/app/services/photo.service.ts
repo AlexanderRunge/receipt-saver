@@ -1,9 +1,9 @@
-import { Injectable, inject } from '@angular/core';
-import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
-import { Filesystem, Directory } from "@capacitor/filesystem";
-import { Platform } from "@ionic/angular"
-import { Capacitor } from "@capacitor/core";
-import { PhotoInterface } from "../interfaces/photo.interface"
+import {inject, Injectable} from '@angular/core';
+import {Camera, CameraDirection, CameraResultType, CameraSource, Photo} from '@capacitor/camera';
+import {Directory, Filesystem} from "@capacitor/filesystem";
+import {Platform} from "@ionic/angular"
+import {Capacitor} from "@capacitor/core";
+import {PhotoInterface} from "../interfaces/photo.interface"
 
 @Injectable({
   providedIn: 'root',
@@ -15,28 +15,33 @@ export class PhotoService {
     this.platform = inject(Platform);
   }
 
-  /**
-   * Capture a new photo and save it to the filesystem
-   * Returns the saved photo reference without managing it in an internal array
-   */
   public async captureAndSavePhoto(): Promise<PhotoInterface> {
     try {
+      console.log('=== Capturing photo ===');
+
       const capturedPhoto = await Camera.getPhoto({
         resultType: CameraResultType.Uri,
         source: CameraSource.Prompt,
         quality: 100,
+        direction: CameraDirection.Rear,
       });
 
-      return await this.savePhoto(capturedPhoto);
+      console.log('Photo captured from camera:', {
+        path: capturedPhoto.path,
+        webPath: capturedPhoto.webPath,
+        format: capturedPhoto.format,
+      });
+
+      const savedPhotoFile = await this.savePhoto(capturedPhoto);
+      console.log('Photo saved to filesystem:', savedPhotoFile);
+
+      return savedPhotoFile;
     } catch (error) {
       console.error('Error capturing photo:', error);
       throw error;
     }
   }
 
-  /**
-   * Save a photo to the filesystem
-   */
   private async savePhoto(photo: Photo): Promise<PhotoInterface> {
     let base64Data: string | Blob;
 
@@ -48,7 +53,7 @@ export class PhotoService {
     } else {
       const response = await fetch(photo.webPath!);
       const blob = await response.blob();
-      base64Data = await this.convertBlobToBase64(blob) as string;
+      base64Data = (await this.convertBlobToBase64(blob)) as string;
     }
 
     const fileName = Date.now() + '.jpeg';
@@ -58,9 +63,12 @@ export class PhotoService {
       directory: Directory.Data,
     });
 
+    console.log('File saved. savedFile.uri:', savedFile.uri);
+
     if (this.platform.is('hybrid')) {
+      // Store the full URI - this is what OCR needs
       return {
-        filepath: savedFile.uri,
+        filepath: savedFile.uri,  // Full file:// URI
         webviewPath: Capacitor.convertFileSrc(savedFile.uri),
       };
     } else {
@@ -71,31 +79,60 @@ export class PhotoService {
     }
   }
 
-  /**
-   * Load a photo from the filesystem for display
-   */
   public async loadPhoto(photo: PhotoInterface): Promise<PhotoInterface> {
-    if (this.platform.is('hybrid')) {
-      const readFile = await Filesystem.readFile({
-        path: photo.filepath,
-        directory: Directory.Data,
-      });
+    try {
+      console.log('Loading photo. Filepath:', photo.filepath);
 
-      return {
-        ...photo,
-        webviewPath: `data:image/jpeg;base64,${readFile.data}`,
-      };
+      if (this.platform.is('hybrid')) {
+        // Extract just the filename from the URI
+        let filename = photo.filepath;
+
+        // Remove file:// protocol if present
+        if (filename.startsWith('file://')) {
+          filename = filename.replace('file://', '');
+        }
+
+        // Get just the filename (after last /)
+        if (filename.includes('/')) {
+          filename = filename.substring(filename.lastIndexOf('/') + 1);
+        }
+
+        console.log('Reading filename:', filename);
+
+        const readFile = await Filesystem.readFile({
+          path: filename,
+          directory: Directory.Data,
+        });
+
+        return {
+          ...photo,
+          webviewPath: `data:image/jpeg;base64,${readFile.data}`,
+        };
+      }
+
+      return photo;
+    } catch (error) {
+      console.error('Error loading photo:', error);
+      return photo;
     }
-
-    return photo;
   }
 
-  /**
-   * Delete a photo from the filesystem
-   */
   public async deletePhoto(photo: PhotoInterface): Promise<void> {
     try {
-      const filename = photo.filepath.slice(photo.filepath.lastIndexOf('/') + 1);
+      // Extract filename from filepath
+      let filename = photo.filepath;
+
+      // Remove file:// protocol
+      if (filename.startsWith('file://')) {
+        filename = filename.replace('file://', '');
+      }
+
+      // Get just the filename
+      if (filename.includes('/')) {
+        filename = filename.substring(filename.lastIndexOf('/') + 1);
+      }
+
+      console.log('Deleting file:', filename);
 
       await Filesystem.deleteFile({
         path: filename,

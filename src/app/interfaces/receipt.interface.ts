@@ -8,17 +8,8 @@ export interface ReceiptInterface {
   totalAmount?: number;
   date?: string;
 
-  items?: ReceiptItem[];
-
   createdAt: string;
   updatedAt: string;
 
   ocrProcessed: boolean;
-}
-
-export interface ReceiptItem {
-  name: string;
-  quantity?: number;
-  unitPrice?: number;
-  totalPrice?: number;
 }
