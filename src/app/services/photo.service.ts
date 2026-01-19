@@ -9,11 +9,7 @@ import {PhotoInterface} from "../interfaces/photo.interface"
   providedIn: 'root',
 })
 export class PhotoService {
-  private platform: Platform;
-
-  constructor() {
-    this.platform = inject(Platform);
-  }
+  private readonly platform = inject(Platform);
 
   public async captureAndSavePhoto(): Promise<PhotoInterface> {
     try {

@@ -31,7 +31,6 @@ import { ReceiptInterface } from '../../interfaces/receipt.interface';
   selector: 'app-receipts',
   templateUrl: './receipts.page.html',
   styleUrls: ['./receipts.page.scss'],
-  standalone: true,
   imports: [
     CommonModule,
     IonContent,

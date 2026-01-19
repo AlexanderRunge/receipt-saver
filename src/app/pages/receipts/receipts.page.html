@@ -7,13 +7,13 @@
       placeholder="Search receipts..."
       (ionInput)="onSearchChange($event)"
       [debounce]="300"
-    ></ion-searchbar>
+    />
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
-    <ion-refresher-content></ion-refresher-content>
+    <ion-refresher-content/>
   </ion-refresher>
 
   <!-- Summary Card -->

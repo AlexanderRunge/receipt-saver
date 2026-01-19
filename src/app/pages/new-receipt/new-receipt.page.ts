@@ -7,7 +7,6 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
   selector: 'app-new-receipt',
   templateUrl: './new-receipt.page.html',
   styleUrls: ['./new-receipt.page.scss'],
-  standalone: true,
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
 })
 export class NewReceiptPage implements OnInit {

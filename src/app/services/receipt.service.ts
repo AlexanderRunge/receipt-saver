@@ -4,7 +4,6 @@ import { PhotoService } from './photo.service';
 import { ReceiptInterface } from "../interfaces/receipt.interface";
 import {OcrService} from "./ocr.service";
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -12,13 +11,8 @@ export class ReceiptService {
   public receipts: ReceiptInterface[] = [];
   private RECEIPT_STORAGE: string = 'receipts';
 
-  private photoService: PhotoService;
-  private ocrService: OcrService;
-
-  constructor() {
-    this.photoService = inject(PhotoService);
-    this.ocrService = inject(OcrService);
-  }
+  private readonly photoService = inject(PhotoService);
+  private readonly ocrService = inject(OcrService);
 
   public async createReceipt(): Promise<ReceiptInterface> {
     try {

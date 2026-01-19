@@ -13,7 +13,6 @@ import { camera } from 'ionicons/icons';
   selector: 'app-gallery',
   templateUrl: 'gallery.page.html',
   styleUrls: ['gallery.page.scss'],
-  standalone: true,
   imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonImg]
 })
 
