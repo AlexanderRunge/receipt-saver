@@ -3,6 +3,7 @@ import { Preferences } from '@capacitor/preferences';
 import { PhotoService } from './photo.service';
 import { ReceiptInterface } from "../interfaces/receipt.interface";
 import {OcrService} from "./ocr.service";
+import {PhotoInterface} from "../interfaces/photo.interface";
 
 @Injectable({
   providedIn: 'root',
@@ -14,15 +15,8 @@ export class ReceiptService {
   private readonly photoService = inject(PhotoService);
   private readonly ocrService = inject(OcrService);
 
-  public async createReceipt(): Promise<ReceiptInterface> {
+  public async createReceipt(photo: PhotoInterface): Promise<ReceiptInterface> {
     try {
-      console.log('=== Creating receipt (no OCR) ===');
-
-      // Capture and save the photo
-      const photo = await this.photoService.captureAndSavePhoto();
-      console.log('Photo saved:', photo.filepath);
-
-      // Create the receipt
       const receipt: ReceiptInterface = {
         id: this.generateId(),
         photo: photo,
@@ -30,34 +24,24 @@ export class ReceiptService {
         ocrProcessed: false,
       };
 
-      // Add to receipts array
       this.receipts.unshift(receipt);
-      console.log('Receipt added. Total:', this.receipts.length);
-
-      // Save to storage
-      await this.saveReceipts();
-      console.log('Receipt saved to storage');
 
       return receipt;
     } catch (error) {
-      console.error('Error creating receipt:', error);
       throw error;
     }
   }
 
   public async loadReceipts(): Promise<void> {
     try {
-      console.log('Loading receipts from storage...');
 
       const { value: receiptList } = await Preferences.get({
         key: this.RECEIPT_STORAGE,
       });
 
-      console.log('Raw receipt data:', receiptList);
 
       this.receipts = (receiptList ? JSON.parse(receiptList) : []) as ReceiptInterface[];
 
-      console.log('Parsed receipts count:', this.receipts.length);
 
       // Load photo data for each receipt
       for (let i = 0; i < this.receipts.length; i++) {
@@ -73,9 +57,7 @@ export class ReceiptService {
 
       }
 
-      console.log('All receipts loaded. Final count:', this.receipts.length);
     } catch (error) {
-      console.error('Error loading receipts:', error);
       this.receipts = [];
     }
   }
@@ -88,7 +70,6 @@ export class ReceiptService {
       const index = this.receipts.findIndex((r) => r.id === id);
 
       if (index === -1) {
-        console.error('Receipt not found:', id);
         return null;
       }
 
@@ -101,7 +82,6 @@ export class ReceiptService {
 
       return this.receipts[index];
     } catch (error) {
-      console.error('Error updating receipt:', error);
       throw error;
     }
   }
@@ -112,7 +92,6 @@ export class ReceiptService {
       const index = this.receipts.findIndex((r) => r.id === id);
 
       if (index === -1) {
-        console.error('Receipt not found:', id);
         return;
       }
 
@@ -129,15 +108,12 @@ export class ReceiptService {
       // Save updated list
       await this.saveReceipts();
     } catch (error) {
-      console.error('Error deleting receipt:', error);
       throw error;
     }
   }
 
   private async saveReceipts(): Promise<void> {
     try {
-      console.log('=== saveReceipts called ===');
-      console.log('Number of receipts to save:', this.receipts.length);
 
       if (this.receipts.length === 0) {
         console.warn('WARNING: Trying to save empty receipts array!');

@@ -38,9 +38,6 @@
               <ion-card-title>
                 {{ receipt.storeName || 'Unknown Store' }}
               </ion-card-title>
-              <ion-card-subtitle>
-                {{ formatDate(receipt.date) }}
-              </ion-card-subtitle>
             </div>
             <div>
               <ion-button fill="clear" color="danger" (click)="deleteReceipt(receipt, $event)">
@@ -57,32 +54,6 @@
                 <img [src]="receipt.photo.webviewPath" alt="Receipt"/>
               </ion-thumbnail>
             }
-
-            <div class="receipt-details">
-              @if (receipt.totalAmount) {
-                <p class="amount">{{ formatAmount(receipt.totalAmount) }}</p>
-              }
-
-              <!--
-              @if (receipt.items && receipt.items.length > 0) {
-                <p class="item-count">{{ receipt.items.length }} items</p>
-              }
-              -->
-
-              @if (!receipt.ocrProcessed) {
-                <ion-chip color="warning">
-                  <ion-label>Processing OCR...</ion-label>
-                </ion-chip>
-              } @else if (!receipt.storeName) {
-                <ion-chip color="danger">
-                  <ion-label>OCR Failed</ion-label>
-                </ion-chip>
-              } @else {
-                <ion-chip color="success">
-                  <ion-label>OCR Complete</ion-label>
-                </ion-chip>
-              }
-            </div>
           </div>
         </ion-card-content>
       </ion-card>

@@ -43,6 +43,13 @@
               </div>
             }
           </div>
+
+          @if (photoPreview) {
+            <ion-button expand="block" (click)="runOcrOnPhoto()">
+              <ion-icon slot="start" name="scan-outline"></ion-icon>
+              Process Receipt
+            </ion-button>
+          }
         </ion-card-content>
       </ion-card>
 
@@ -51,7 +58,7 @@
 
         <ion-item lines="none" class="form-item">
           <ion-label position="stacked">Store Name</ion-label>
-          <ion-input formControlName="storeName" placeholder="e.g., Whole Foods" type="text"/>
+          <ion-input formControlName="storeName" placeholder="f.x. Bilka" type="text"/>
         </ion-item>
 
         <!--
@@ -69,16 +76,6 @@
           </ion-item>
         </div>
         -->
-
-        <ion-card class="info-card">
-          <ion-card-content>
-            <div class="info-content">
-              <ion-icon name="information-circle-outline"/>
-              <p>Optional fields will be automatically extracted from your receipt photo using OCR.</p>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
       </div>
 
       <!-- Submit Buttons -->

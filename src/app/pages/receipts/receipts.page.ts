@@ -38,7 +38,6 @@ import { ReceiptInterface } from '../../interfaces/receipt.interface';
     IonHeader,
     IonTitle,
     IonToolbar,
-    IonLabel,
     IonThumbnail,
     IonButton,
     IonIcon,
@@ -47,9 +46,7 @@ import { ReceiptInterface } from '../../interfaces/receipt.interface';
     IonCard,
     IonCardHeader,
     IonCardTitle,
-    IonCardSubtitle,
     IonCardContent,
-    IonChip,
     IonRefresher,
     IonRefresherContent,
     IonSearchbar,
@@ -103,7 +100,7 @@ export class ReceiptsPage implements OnInit {
     );
   }
 
-  async addReceipt() {
+  /*async addReceipt() {
     console.log('=== addReceipt() called ===');
     this.isLoading = true;
 
@@ -133,7 +130,7 @@ export class ReceiptsPage implements OnInit {
     } finally {
       this.isLoading = false;
     }
-  }
+  }*/
 
   async deleteReceipt(receipt: ReceiptInterface, event: Event) {
     event.stopPropagation();

@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"/>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Receipt Details</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="deleteReceipt()" color="danger">
+        <ion-icon name="trash-outline"/>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (receipt) {
+    <div class="receipt-container">
+
+      <!-- Receipt Image -->
+      <ion-card>
+        @if (receipt.photo.webviewPath) {
+          <ion-img [src]="receipt.photo.webviewPath" alt="Receipt photo" class="receipt-image"/>
+        }
+      </ion-card>
+
+      <!-- Receipt Information -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ receipt.storeName || 'Unknown Store' }}</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <ion-item lines="none">
+            <ion-label>
+              <h3>Created</h3>
+              <p>{{ formatDate(receipt.createdAt) }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  } @else {
+  <!-- Loading or Not Found -->
+    <div class="empty-state">
+      <p>Receipt not found</p>
+      <ion-button (click)="goBack()">Go Back</ion-button>
+    </div>
+  }
+</ion-content>

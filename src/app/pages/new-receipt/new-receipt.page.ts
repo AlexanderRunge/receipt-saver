@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NavController } from '@ionic/angular';
 import {
-  IonBackButton,
   IonButton,
   IonButtons,
   IonCard,
@@ -25,6 +24,7 @@ import { PhotoInterface } from '../../interfaces/photo.interface';
 import { addIcons } from "ionicons";
 import { close, cameraOutline, informationCircleOutline, arrowBack } from "ionicons/icons";
 import {OcrService} from "../../services/ocr.service"; // Adjust path
+import {ReceiptService} from "../../services/receipt.service"; // Adjust path
 
 @Component({
   selector: 'app-new-receipt',
@@ -36,7 +36,6 @@ import {OcrService} from "../../services/ocr.service"; // Adjust path
     IonHeader,
     IonToolbar,
     IonButtons,
-    IonBackButton,
     IonTitle,
     IonContent,
     IonCard,
@@ -57,10 +56,14 @@ export class NewReceiptPage {
   selectedPhoto: PhotoInterface | null = null;
   isSubmitting = false;
 
+  private ocrProcessed: boolean = false;
+  private ocrString: string = '';
+
   private readonly fb: FormBuilder = inject(FormBuilder);
   private readonly navCtrl: NavController = inject(NavController);
   private readonly photoService: PhotoService = inject(PhotoService);
   private readonly ocrService: OcrService = inject(OcrService);
+  private readonly receiptService: ReceiptService = inject(ReceiptService);
 
   constructor() {
     addIcons({ cameraOutline, close, informationCircleOutline, arrowBack });
@@ -90,9 +93,13 @@ export class NewReceiptPage {
   }
 
   async runOcrOnPhoto(): Promise<void> {
+    // Show loading state
+    this.receiptForm.patchValue({ storeName: 'Processing...' });
+
     let ocrText;
     if (this.selectedPhoto) {
       ocrText = await this.ocrService.getTextDetectionsInString(this.selectedPhoto.filepath);
+      ocrText = this.ocrString;
     }
 
     let receiptData;
@@ -101,18 +108,60 @@ export class NewReceiptPage {
     }
 
     if (receiptData) {
+      this.ocrProcessed = true;
       this.receiptForm.patchValue({
         storeName: receiptData.storeName,
         totalAmount: receiptData.totalAmount,
         date: receiptData.date
       });
+    } else {
+      // Clear loading state if no data found
+      this.receiptForm.patchValue({ storeName: '' });
     }
   }
 
-  onSubmit(): void {
-    // Your implementation here
-    // Access form values: this.receiptForm.value
-    // Access selected file: this.selectedFile
+  async onSubmit(): Promise<void> {
+    // Prevent multiple submissions
+    if (this.isSubmitting) {
+      return;
+    }
+
+    // Validate that a photo exists
+    if (!this.selectedPhoto) {
+      console.error('No photo selected');
+      // Optionally show a toast/alert to the user
+      return;
+    }
+
+    try {
+      this.isSubmitting = true;
+
+      // Create the receipt with the photo
+      const receipt = await this.receiptService.createReceipt(this.selectedPhoto);
+
+      // Update the receipt with form data
+      const formValue = this.receiptForm.value;
+      await this.receiptService.updateReceipt(receipt.id, {
+        storeName: formValue.storeName || undefined,
+      });
+
+      // Save all receipts to storage
+      await this.receiptService['saveReceipts']();
+
+      // Clear form and photo
+      this.selectedPhoto = null;
+      this.photoPreview = null;
+      this.receiptForm.reset();
+
+      // Navigate back
+      this.navCtrl.back();
+
+    } catch (error) {
+      console.error('Error saving receipt:', error);
+      // Optionally show error message to user
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   cancel(): void {

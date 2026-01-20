@@ -1,4 +1,5 @@
 import { PhotoInterface } from './photo.interface';
+import {TextDetection} from "@capacitor-community/image-to-text";
 
 export interface ReceiptInterface {
   id: string;
@@ -11,4 +12,6 @@ export interface ReceiptInterface {
   createdAt?: string;
 
   ocrProcessed?: boolean;
+  ocrString?: string;
+  ocrTextDetections?: TextDetection[];
 }
