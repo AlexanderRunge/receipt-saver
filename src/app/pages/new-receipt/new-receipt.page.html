@@ -1,13 +1,103 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>new-receipt</ion-title>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Add Receipt</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">new-receipt</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <form [formGroup]="receiptForm" (ngSubmit)="onSubmit()">
+    <div class="content-wrapper">
+
+      <!-- Photo Upload Section -->
+      <ion-card class="upload-card">
+        <ion-card-content class="upload-content">
+          <div class="upload-area" [class.has-photo]="photoPreview">
+
+            @if (!photoPreview) {
+              <div class="upload-placeholder">
+                <button type="button" class="upload-label" (click)="capturePhoto()">
+                  <div class="upload-icon">
+                    <ion-icon name="camera-outline"/>
+                  </div>
+                  <ion-text color="dark">
+                    <h3 class="upload-text">Tap to capture receipt photo</h3>
+                  </ion-text>
+                  <ion-text color="medium">
+                    <p class="upload-hint">Camera or Gallery</p>
+                  </ion-text>
+                </button>
+              </div>
+            }
+
+            @if (photoPreview) {
+              <div class="photo-preview">
+                <img [src]="photoPreview" alt="Receipt preview"/>
+                <ion-fab-button class="remove-photo" size="small" color="danger" (click)="removePhoto()">
+                  <ion-icon name="close"/>
+                </ion-fab-button>
+              </div>
+            }
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Form Fields -->
+      <div class="form-fields">
+
+        <ion-item lines="none" class="form-item">
+          <ion-label position="stacked">Store Name</ion-label>
+          <ion-input formControlName="storeName" placeholder="e.g., Whole Foods" type="text"/>
+        </ion-item>
+
+        <!--
+        <div class="field-row">
+          <ion-item lines="none" class="form-item half-width">
+            <ion-label position="stacked">Total Amount</ion-label>
+            <ion-input formControlName="totalAmount" placeholder="0.00" type="number" inputmode="decimal">
+              <span slot="start" class="currency-symbol">$</span>
+            </ion-input>
+          </ion-item>
+
+          <ion-item lines="none" class="form-item half-width">
+            <ion-label position="stacked">Date</ion-label>
+            <ion-input formControlName="date" type="date"/>
+          </ion-item>
+        </div>
+        -->
+
+        <ion-card class="info-card">
+          <ion-card-content>
+            <div class="info-content">
+              <ion-icon name="information-circle-outline"/>
+              <p>Optional fields will be automatically extracted from your receipt photo using OCR.</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+      </div>
+
+      <!-- Submit Buttons -->
+      <div class="button-section">
+        <ion-button expand="block" fill="outline" (click)="cancel()" [disabled]="isSubmitting">
+          Cancel
+        </ion-button>
+
+        <ion-button expand="block" type="submit" [disabled]="!selectedPhoto || isSubmitting">
+          @if (isSubmitting) {
+            <ion-spinner name="crescent"/>
+            <span>Uploading...</span>
+          }
+          @if (!isSubmitting) {
+            <span>Save Receipt</span>
+          }
+        </ion-button>
+      </div>
+
+    </div>
+  </form>
 </ion-content>

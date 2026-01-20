@@ -3,11 +3,7 @@
     <ion-title>Receipts</ion-title>
   </ion-toolbar>
   <ion-toolbar>
-    <ion-searchbar
-      placeholder="Search receipts..."
-      (ionInput)="onSearchChange($event)"
-      [debounce]="300"
-    />
+    <ion-searchbar placeholder="Search receipts..." (ionInput)="onSearchChange($event)" [debounce]="300"/>
   </ion-toolbar>
 </ion-header>
 
@@ -23,16 +19,13 @@
     </ion-card-header>
     <ion-card-content>
       <p>Total Receipts: {{ filteredReceipts.length }}</p>
-<!--
-      <p>Total Spending: {{ getTotalSpending() }}</p>
--->
+      <!--<p>Total Spending: {{ getTotalSpending() }}</p>-->
     </ion-card-content>
   </ion-card>
 
-  <!-- Receipts List -->
   @if (filteredReceipts.length === 0) {
     <div class="empty-state">
-      <ion-icon name="receipt-outline" size="large"></ion-icon>
+      <ion-icon name="receipt-outline" size="large"/>
       <h2>No receipts yet</h2>
       <p>Tap the + button to add your first receipt</p>
     </div>
@@ -50,21 +43,8 @@
               </ion-card-subtitle>
             </div>
             <div>
-              @if (!receipt.ocrProcessed || !receipt.storeName) {
-                <ion-button
-                  fill="clear"
-                  color="primary"
-                  (click)="retryOCR(receipt, $event)"
-                >
-                  <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
-                </ion-button>
-              }
-              <ion-button
-                fill="clear"
-                color="danger"
-                (click)="deleteReceipt(receipt, $event)"
-              >
-                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              <ion-button fill="clear" color="danger" (click)="deleteReceipt(receipt, $event)">
+                <ion-icon slot="icon-only" name="trash-outline"/>
               </ion-button>
             </div>
           </div>
@@ -72,22 +52,22 @@
 
         <ion-card-content>
           <div class="receipt-content">
-            <ion-thumbnail>
-              <img
-                [src]="receipt.photo.webviewPath"
-                alt="Receipt"
-                (error)="onImageError($event, receipt)"
-              />
-            </ion-thumbnail>
+            @if (receipt.photo) {
+              <ion-thumbnail>
+                <img [src]="receipt.photo.webviewPath" alt="Receipt"/>
+              </ion-thumbnail>
+            }
 
             <div class="receipt-details">
               @if (receipt.totalAmount) {
                 <p class="amount">{{ formatAmount(receipt.totalAmount) }}</p>
               }
 
-<!--              @if (receipt.items && receipt.items.length > 0) {
+              <!--
+              @if (receipt.items && receipt.items.length > 0) {
                 <p class="item-count">{{ receipt.items.length }} items</p>
-              }-->
+              }
+              -->
 
               @if (!receipt.ocrProcessed) {
                 <ion-chip color="warning">
@@ -111,8 +91,8 @@
 
   <!-- FAB Button -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-    <ion-fab-button (click)="addReceipt()">
-      <ion-icon name="camera-outline"></ion-icon>
+    <ion-fab-button (click)="openNewReceipt()">
+      <ion-icon name="add-outline"/>
     </ion-fab-button>
   </ion-fab>
 </ion-content>

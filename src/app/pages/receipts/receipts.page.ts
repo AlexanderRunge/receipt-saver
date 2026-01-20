@@ -1,6 +1,7 @@
-import {Component, inject, OnInit} from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import {
   IonContent,
   IonHeader,
@@ -23,7 +24,7 @@ import {
   IonSearchbar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { add, trashOutline, receiptOutline, cameraOutline, refreshOutline } from 'ionicons/icons';
+import { addOutline, trashOutline, receiptOutline, cameraOutline, refreshOutline } from 'ionicons/icons';
 import { ReceiptService } from '../../services/receipt.service';
 import { ReceiptInterface } from '../../interfaces/receipt.interface';
 
@@ -58,13 +59,13 @@ export class ReceiptsPage implements OnInit {
   searchTerm: string = '';
   isLoading: boolean = false;
 
-  public receiptService: ReceiptService;
-  private router: Router;
+  public receiptService: ReceiptService = inject(ReceiptService);
+  private router: Router = inject(Router);
+  private navCtrl: NavController = inject(NavController);
+
 
   constructor() {
-    this.receiptService = inject(ReceiptService);
-    this.router = inject(Router);
-    addIcons({ add, trashOutline, receiptOutline, cameraOutline, refreshOutline });
+    addIcons({ addOutline, trashOutline, receiptOutline, cameraOutline, refreshOutline });
   }
 
   async ngOnInit() {
@@ -179,10 +180,8 @@ export class ReceiptsPage implements OnInit {
     return this.receiptService.getTotalSpending().toFixed(2);
   }*/
 
-  onImageError(event: any, receipt: ReceiptInterface) {
-    console.error('Image failed to load for receipt:', receipt.id);
-    console.error('Image src was:', receipt.photo.webviewPath);
-    console.error('Image filepath:', receipt.photo.filepath);
+  openNewReceipt() {
+    this.navCtrl.navigateForward('/new-receipt');
   }
 
   async retryOCR(receipt: ReceiptInterface, event: Event) {

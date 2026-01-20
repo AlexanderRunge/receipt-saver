@@ -27,7 +27,6 @@ export class ReceiptService {
         id: this.generateId(),
         photo: photo,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
         ocrProcessed: false,
       };
 
@@ -62,17 +61,16 @@ export class ReceiptService {
 
       // Load photo data for each receipt
       for (let i = 0; i < this.receipts.length; i++) {
-        console.log('Loading photo for receipt:', this.receipts[i].id);
-
-        try {
-          this.receipts[i].photo = await this.photoService.loadPhoto(
-            this.receipts[i].photo
-          );
-          console.log('Photo loaded successfully for:', this.receipts[i].id);
-        } catch (photoError) {
-          console.error('Error loading photo for receipt:', this.receipts[i].id, photoError);
-          // Keep the receipt even if photo loading fails
+        let receiptPhoto = this.receipts[i].photo;
+        if (receiptPhoto) {
+          try {
+            receiptPhoto = await this.photoService.loadPhoto(receiptPhoto);
+          } catch (photoError) {
+            // Keep the receipt even if photo loading fails
+          }
         }
+
+
       }
 
       console.log('All receipts loaded. Final count:', this.receipts.length);
@@ -97,7 +95,6 @@ export class ReceiptService {
       this.receipts[index] = {
         ...this.receipts[index],
         ...updates,
-        updatedAt: new Date().toISOString(),
       };
 
       await this.saveReceipts();
@@ -122,7 +119,9 @@ export class ReceiptService {
       const receipt = this.receipts[index];
 
       // Delete the photo from filesystem
-      await this.photoService.deletePhoto(receipt.photo);
+      if (receipt.photo) {
+        await this.photoService.deletePhoto(receipt.photo);
+      }
 
       // Remove from array
       this.receipts.splice(index, 1);
@@ -179,16 +178,15 @@ export class ReceiptService {
     }
 
     try {
-      console.log('Step 1: Extracting text from image...');
-      console.log('Filepath:', receipt.photo.filepath);
+      let ocrText;
+      if (receipt.photo) {
+        ocrText = await this.ocrService.getTextDetectionsInString(receipt.photo.filepath);
+      }
 
-      const ocrText = await this.ocrService.getTextDetectionsInString(receipt.photo.filepath);
-      console.log('Step 1 DONE. Text length:', ocrText.length);
-      console.log('Extracted text:', ocrText);
-
-      console.log('Step 2: Parsing receipt data...');
-      const receiptData = this.ocrService.parseReceiptData(ocrText);
-      console.log('Step 2 DONE. Parsed data:', JSON.stringify(receiptData, null, 2));
+      let receiptData;
+      if (ocrText) {
+        receiptData = this.ocrService.parseReceiptData(ocrText);
+      }
 
       console.log('Step 3: Updating receipt...');
       await this.updateReceipt(receiptId, {

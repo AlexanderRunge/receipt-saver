@@ -8,8 +8,7 @@ export interface ReceiptInterface {
   totalAmount?: number;
   date?: string;
 
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
 
-  ocrProcessed: boolean;
+  ocrProcessed?: boolean;
 }
